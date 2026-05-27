@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #061a15;
+  --foreground: #f5efe0;
+  --felt-line: rgba(215, 181, 109, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--foreground);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(20, 82, 62, 0.62), transparent 34rem),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0 12%, transparent 12% 100%),
+    #061a15;
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  color: #061a15;
+  background: #d7b56d;
+}
+
+.felt-grid {
+  background-image:
+    linear-gradient(var(--felt-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--felt-line) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.focus-ring {
+  @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass-400;
+}
