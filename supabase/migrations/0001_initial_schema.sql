@@ -2,7 +2,6 @@ create extension if not exists pgcrypto;
 
 create table if not exists public.players (
   id uuid primary key default gen_random_uuid(),
-  auth_user_id uuid references auth.users(id) on delete set null,
   display_name text not null,
   avatar_url text,
   active boolean not null default true,
@@ -14,13 +13,11 @@ create table if not exists public.players (
   best_win_streak integer not null default 0 check (best_win_streak >= 0),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  unique (auth_user_id),
   unique (display_name)
 );
 
 create table if not exists public.pool_matches (
   id uuid primary key default gen_random_uuid(),
-  submitted_by uuid references auth.users(id) on delete set null,
   player_one_id uuid not null references public.players(id) on delete restrict,
   player_two_id uuid not null references public.players(id) on delete restrict,
   player_one_rounds integer not null check (player_one_rounds >= 0),
@@ -84,15 +81,14 @@ create table if not exists public.medal_challenges (
   id uuid primary key default gen_random_uuid(),
   match_id uuid not null references public.pool_matches(id) on delete cascade,
   medal_key text not null,
-  challenged_by uuid references auth.users(id) on delete set null,
   status text not null default 'pending' check (status in ('pending','accepted','rejected')),
   reason text,
-  decided_by uuid references auth.users(id) on delete set null,
   decided_at timestamptz,
   created_at timestamptz not null default now()
 );
 
 create index if not exists players_ladder_idx on public.players(active, stars desc, rounds_won desc);
+create unique index if not exists players_display_name_lower_idx on public.players (lower(display_name));
 create index if not exists pool_matches_played_at_idx on public.pool_matches(played_at desc);
 create index if not exists pool_matches_player_one_idx on public.pool_matches(player_one_id, played_at desc);
 create index if not exists pool_matches_player_two_idx on public.pool_matches(player_two_id, played_at desc);
@@ -115,18 +111,23 @@ drop policy if exists medals_read on public.medals;
 drop policy if exists player_medals_read on public.player_medals;
 drop policy if exists medal_challenges_read on public.medal_challenges;
 
-create policy players_read on public.players for select to authenticated using (true);
-create policy matches_read on public.pool_matches for select to authenticated using (true);
-create policy rounds_read on public.pool_rounds for select to authenticated using (true);
-create policy rating_events_read on public.rating_events for select to authenticated using (true);
-create policy medals_read on public.medals for select to authenticated using (true);
-create policy player_medals_read on public.player_medals for select to authenticated using (true);
-create policy medal_challenges_read on public.medal_challenges for select to authenticated using (true);
+create policy players_read on public.players for select to anon, authenticated using (true);
+create policy matches_read on public.pool_matches for select to anon, authenticated using (true);
+create policy rounds_read on public.pool_rounds for select to anon, authenticated using (true);
+create policy rating_events_read on public.rating_events for select to anon, authenticated using (true);
+create policy medals_read on public.medals for select to anon, authenticated using (true);
+create policy player_medals_read on public.player_medals for select to anon, authenticated using (true);
+create policy medal_challenges_read on public.medal_challenges for select to anon, authenticated using (true);
 
 insert into public.medals (key, name, description, icon) values
 ('winner_first_win', 'Winner!', 'Awarded for winning your first round.', 'trophy'),
 ('winning_streak_3', 'Winning Streak', 'Awarded for 3 consecutive round wins.', 'flame'),
 ('bloodthirsty_5', 'Bloodthirsty', 'Awarded for 5 consecutive round wins.', 'skull'),
+('merciless_10', 'Merciless', 'Awarded for 10 consecutive match wins.', 'crosshair'),
+('ruthless_15', 'Ruthless', 'Awarded for 15 consecutive match wins.', 'target'),
+('relentless_20', 'Relentless', 'Awarded for 20 consecutive match wins.', 'zap'),
+('brutal_25', 'Brutal', 'Awarded for 25 consecutive match wins.', 'axe'),
+('nuclear_30', 'Nuclear', 'Awarded for 30 consecutive match wins.', 'atom'),
 ('payback', 'Payback', 'Awarded for beating someone who beat you before.', 'rotate-ccw'),
 ('under_table', 'Onder de tafel door', 'Awarded when a player wins a round while the opponent pots zero balls.', 'badge-alert'),
 ('giant_slayer', 'Giant Slayer', 'Awarded for beating a player at least 1.5 stars higher.', 'sword'),

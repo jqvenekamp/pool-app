@@ -18,6 +18,36 @@ export const MEDAL_DEFINITIONS = [
     icon: "skull",
   },
   {
+    key: "merciless_10",
+    name: "Merciless",
+    description: "Awarded for 10 consecutive round wins.",
+    icon: "crosshair",
+  },
+  {
+    key: "ruthless_15",
+    name: "Ruthless",
+    description: "Awarded for 15 consecutive round wins.",
+    icon: "target",
+  },
+  {
+    key: "relentless_20",
+    name: "Relentless",
+    description: "Awarded for 20 consecutive round wins.",
+    icon: "zap",
+  },
+  {
+    key: "brutal_25",
+    name: "Brutal",
+    description: "Awarded for 25 consecutive round wins.",
+    icon: "axe",
+  },
+  {
+    key: "nuclear_30",
+    name: "Nuclear",
+    description: "Awarded for 30 consecutive round wins.",
+    icon: "atom",
+  },
+  {
     key: "payback",
     name: "Payback",
     description: "Awarded for beating someone who beat you before.",
@@ -87,6 +117,12 @@ export function evaluateMedalAwards(input: MedalEvaluationInput): MedalAward[] {
       awards.push({ playerId: player.id, medalKey: "bloodthirsty_5" });
     }
 
+    for (const streakMedal of BLACK_OPS_STREAK_MEDALS) {
+      if (player.currentWinStreakAfter === streakMedal.threshold && player.currentWinStreakBefore < streakMedal.threshold) {
+        awards.push({ playerId: player.id, medalKey: streakMedal.medalKey });
+      }
+    }
+
     if (player.matchRoundsWon > player.matchRoundsLost && player.priorLossToOpponent) {
       awards.push({ playerId: player.id, medalKey: "payback", metadata: { opponentId: opponent.id } });
     }
@@ -114,6 +150,14 @@ export function evaluateMedalAwards(input: MedalEvaluationInput): MedalAward[] {
 
   return dedupeAwards(awards);
 }
+
+const BLACK_OPS_STREAK_MEDALS: { threshold: number; medalKey: MedalKey }[] = [
+  { threshold: 10, medalKey: "merciless_10" },
+  { threshold: 15, medalKey: "ruthless_15" },
+  { threshold: 20, medalKey: "relentless_20" },
+  { threshold: 25, medalKey: "brutal_25" },
+  { threshold: 30, medalKey: "nuclear_30" },
+];
 
 export function createUnderTableChallenge(matchId: string, reason?: string) {
   return {

@@ -18,10 +18,10 @@ export function ScorePicker({
   onPlayerTwoRounds: (value: number) => void;
 }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-black/18 p-3">
+    <div className="rounded-[18px] border border-brand-ink/10 bg-brand-paper p-3">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/55">Rounds</p>
-        <p className="text-sm font-black text-brass-400">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink/50">Rounds</p>
+        <p className="text-sm font-black text-brand-orange">
           {playerOneRounds}-{playerTwoRounds}
         </p>
       </div>
@@ -36,21 +36,21 @@ export function ScorePicker({
 function Counter({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-      <span className="truncate text-sm font-semibold text-white">{label}</span>
-      <div className="grid grid-cols-[2.5rem_3rem_2.5rem] items-center rounded-lg border border-white/10 bg-felt-950/60">
+      <span className="truncate text-sm font-black text-brand-ink">{label}</span>
+      <div className="grid grid-cols-[2.5rem_3rem_2.5rem] items-center rounded-[16px] border border-brand-ink/10 bg-white shadow-sm">
         <button
           type="button"
           onClick={() => onChange(Math.max(0, value - 1))}
-          className="focus-ring grid size-10 place-items-center rounded-md text-white/70 hover:text-white"
+          className="focus-ring grid size-10 place-items-center rounded-[14px] text-brand-ink/55 hover:text-brand-orange"
           aria-label={`Decrease ${label} rounds`}
         >
           <Minus size={16} aria-hidden="true" />
         </button>
-        <span className="text-center text-base font-black text-white">{value}</span>
+        <span className="text-center text-base font-black text-brand-ink">{value}</span>
         <button
           type="button"
           onClick={() => onChange(Math.min(25, value + 1))}
-          className="focus-ring grid size-10 place-items-center rounded-md text-white/70 hover:text-white"
+          className="focus-ring grid size-10 place-items-center rounded-[14px] text-brand-ink/55 hover:text-brand-orange"
           aria-label={`Increase ${label} rounds`}
         >
           <Plus size={16} aria-hidden="true" />

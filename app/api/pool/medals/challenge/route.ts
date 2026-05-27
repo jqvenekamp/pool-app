@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createUnderTableChallenge } from "@/lib/pool/medals";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { hasSupabaseAdminEnv, hasSupabasePublicEnv } from "@/lib/supabase/config";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { hasSupabaseAdminEnv } from "@/lib/supabase/config";
 
 export const runtime = "nodejs";
 
@@ -19,30 +18,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  if (!hasSupabaseAdminEnv() || !hasSupabasePublicEnv()) {
+  if (!hasSupabaseAdminEnv()) {
     return NextResponse.json({
       challenge: createUnderTableChallenge(parsed.data.matchId, parsed.data.reason),
       demoMode: true,
     });
   }
 
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    return NextResponse.json({ error: "You need to be signed in to challenge a medal." }, { status: 401 });
-  }
-
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("medal_challenges")
-    .insert({
-      ...createUnderTableChallenge(parsed.data.matchId, parsed.data.reason),
-      challenged_by: user.id,
-    })
+    .insert(createUnderTableChallenge(parsed.data.matchId, parsed.data.reason))
     .select()
     .single();
 

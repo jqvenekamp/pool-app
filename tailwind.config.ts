@@ -9,20 +9,30 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        brand: {
+          ink: "#171717",
+          paper: "#fff7ef",
+          orange: "#ff5a1f",
+          coral: "#ff8a5b",
+          blush: "#ffe1d2",
+          graphite: "#2b2b2b",
+          blue: "#3157ff",
+          mint: "#47d6a4",
+        },
         felt: {
-          950: "#061a15",
-          900: "#08231c",
-          800: "#0d3428",
-          700: "#14523e",
+          950: "#171717",
+          900: "#2b2b2b",
+          800: "#403f3c",
+          700: "#5e5a54",
         },
         brass: {
-          400: "#d7b56d",
-          500: "#c99d48",
-          700: "#876223",
+          400: "#ff5a1f",
+          500: "#e94a12",
+          700: "#a9320c",
         },
       },
       boxShadow: {
-        glow: "0 0 32px rgba(215, 181, 109, 0.2)",
+        glow: "0 18px 45px rgba(255, 90, 31, 0.18)",
       },
     },
   },

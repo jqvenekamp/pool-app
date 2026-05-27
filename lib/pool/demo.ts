@@ -1,4 +1,5 @@
 import type { LadderPlayer } from "@/lib/pool/ladder";
+import type { MatchRecord } from "@/lib/pool/head-to-head";
 
 export const demoPlayers: LadderPlayer[] = [
   {
@@ -78,7 +79,7 @@ export const demoPlayers: LadderPlayer[] = [
   },
   {
     id: "66666666-6666-4666-8666-666666666666",
-    display_name: "Avery Prins",
+    display_name: "Jurre Prins",
     avatar_url: null,
     active: true,
     stars: 1.42,
@@ -90,5 +91,48 @@ export const demoPlayers: LadderPlayer[] = [
     recent_form: ["W", "L", "L", "W", "L"],
     medal_count: 1,
     last_win_at: "2026-05-19T12:06:00.000Z",
+  },
+];
+
+export const demoMatches: MatchRecord[] = [
+  {
+    id: "match-demo-1",
+    player_one_id: "44444444-4444-4444-8444-444444444444",
+    player_two_id: "66666666-6666-4666-8666-666666666666",
+    player_one_rounds: 2,
+    player_two_rounds: 0,
+    played_at: "2026-05-22T12:00:00.000Z",
+  },
+  {
+    id: "match-demo-2",
+    player_one_id: "66666666-6666-4666-8666-666666666666",
+    player_two_id: "44444444-4444-4444-8444-444444444444",
+    player_one_rounds: 1,
+    player_two_rounds: 2,
+    played_at: "2026-05-23T12:00:00.000Z",
+  },
+  {
+    id: "match-demo-3",
+    player_one_id: "44444444-4444-4444-8444-444444444444",
+    player_two_id: "66666666-6666-4666-8666-666666666666",
+    player_one_rounds: 3,
+    player_two_rounds: 1,
+    played_at: "2026-05-24T12:00:00.000Z",
+  },
+  {
+    id: "match-demo-4",
+    player_one_id: "11111111-1111-4111-8111-111111111111",
+    player_two_id: "22222222-2222-4222-8222-222222222222",
+    player_one_rounds: 2,
+    player_two_rounds: 1,
+    played_at: "2026-05-25T12:00:00.000Z",
+  },
+  {
+    id: "match-demo-5",
+    player_one_id: "33333333-3333-4333-8333-333333333333",
+    player_two_id: "55555555-5555-4555-8555-555555555555",
+    player_one_rounds: 1,
+    player_two_rounds: 1,
+    played_at: "2026-05-25T13:30:00.000Z",
   },
 ];

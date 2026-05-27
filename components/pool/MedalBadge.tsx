@@ -1,12 +1,17 @@
 "use client";
 
-import { BadgeAlert, Flame, RotateCcw, Skull, Sparkles, Sword, Trophy } from "lucide-react";
+import { Atom, Axe, BadgeAlert, Crosshair, Flame, RotateCcw, Skull, Sparkles, Sword, Target, Trophy, Zap } from "lucide-react";
 import { MEDAL_DEFINITIONS, type MedalKey } from "@/lib/pool/medals";
 
 const icons = {
   trophy: Trophy,
   flame: Flame,
   skull: Skull,
+  crosshair: Crosshair,
+  target: Target,
+  zap: Zap,
+  axe: Axe,
+  atom: Atom,
   "rotate-ccw": RotateCcw,
   "badge-alert": BadgeAlert,
   sword: Sword,
@@ -18,7 +23,7 @@ export function MedalBadge({ medalKey, count }: { medalKey: MedalKey; count?: nu
   const Icon = icons[medal.icon];
 
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-brass-400/30 bg-brass-400/12 px-2.5 py-1 text-xs font-bold text-brass-400">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-orange/20 bg-brand-orange/10 px-2.5 py-1 text-xs font-extrabold text-brand-orange">
       <Icon size={13} aria-hidden="true" />
       {medal.name}
       {count ? <span className="text-white/60">x{count}</span> : null}

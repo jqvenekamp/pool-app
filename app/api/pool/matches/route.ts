@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { demoPlayers } from "@/lib/pool/demo";
+import { demoMatches, demoPlayers } from "@/lib/pool/demo";
+import { enrichPlayersWithHeadToHead, type MatchRecord } from "@/lib/pool/head-to-head";
 import { sortLadder, type LadderPlayer } from "@/lib/pool/ladder";
 import { evaluateMedalAwards, type MedalAward } from "@/lib/pool/medals";
 import { calculateRating, FORMULA_VERSION } from "@/lib/pool/rating";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { hasSupabaseAdminEnv, hasSupabasePublicEnv } from "@/lib/supabase/config";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { hasSupabaseAdminEnv } from "@/lib/supabase/config";
 
 export const runtime = "nodejs";
 
@@ -50,22 +50,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  if (!hasSupabaseAdminEnv() || !hasSupabasePublicEnv()) {
-    return NextResponse.json(simulateMatch(parsed.data, demoPlayers, true));
+  if (!hasSupabaseAdminEnv()) {
+    return NextResponse.json(simulateMatch(parsed.data, demoPlayers, demoMatches, true));
   }
 
   if (process.env.NODE_ENV !== "production" && isDemoMatch(parsed.data.playerOneId, parsed.data.playerTwoId)) {
-    return NextResponse.json(simulateMatch(parsed.data, demoPlayers, true));
-  }
-
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    return NextResponse.json({ error: "You need to be signed in to submit scores." }, { status: 401 });
+    return NextResponse.json(simulateMatch(parsed.data, demoPlayers, demoMatches, true));
   }
 
   const admin = createAdminClient();
@@ -97,7 +87,6 @@ export async function POST(request: Request) {
   const { data: match, error: matchError } = await admin
     .from("pool_matches")
     .insert({
-      submitted_by: user.id,
       player_one_id: parsed.data.playerOneId,
       player_two_id: parsed.data.playerTwoId,
       player_one_rounds: parsed.data.playerOneRounds,
@@ -221,17 +210,35 @@ export async function POST(request: Request) {
 
   await insertMedalAwards(admin, medalAwards, match.id);
 
-  const updatedPlayers = [
-    toUpdatedPlayer(playerOne, rating.playerOne.after, parsed.data.playerOneRounds, parsed.data.playerTwoRounds, streaks.playerOne),
-    toUpdatedPlayer(playerTwo, rating.playerTwo.after, parsed.data.playerTwoRounds, parsed.data.playerOneRounds, streaks.playerTwo),
-  ];
+  const { data: allPlayers } = await admin
+    .from("players")
+    .select("id, display_name, avatar_url, active, stars, games_played, rounds_won, rounds_lost, current_win_streak, best_win_streak")
+    .eq("active", true);
+  const { data: allMatches } = await admin
+    .from("pool_matches")
+    .select("id, player_one_id, player_two_id, player_one_rounds, player_two_rounds, played_at")
+    .order("played_at", { ascending: true });
+  const { data: allMedals } = await admin.from("player_medals").select("player_id");
+  const medalCounts = new Map<string, number>();
+
+  for (const medal of allMedals ?? []) {
+    medalCounts.set(medal.player_id, (medalCounts.get(medal.player_id) ?? 0) + 1);
+  }
+
+  const ladderPlayers = (allPlayers ?? []).map((player) => ({
+    ...player,
+    stars: Number(player.stars),
+    recent_form: recentFormForPlayer(player.id, allMatches ?? []),
+    medal_count: medalCounts.get(player.id) ?? 0,
+    last_win_at: lastWinForPlayer(player.id, allMatches ?? []),
+  }));
 
   return NextResponse.json({
     match,
     rating,
     medalAwards,
     streaks,
-    ladder: sortLadder(updatedPlayers),
+    ladder: sortLadder(enrichPlayersWithHeadToHead(ladderPlayers, allMatches ?? [])),
     demoMode: false,
   });
 }
@@ -241,7 +248,7 @@ function isDemoMatch(playerOneId: string, playerTwoId: string) {
   return demoIds.has(playerOneId) && demoIds.has(playerTwoId);
 }
 
-function simulateMatch(input: z.infer<typeof MatchSchema>, players: LadderPlayer[], demoMode: boolean) {
+function simulateMatch(input: z.infer<typeof MatchSchema>, players: LadderPlayer[], matches: MatchRecord[], demoMode: boolean) {
   const playerOne = players.find((player) => player.id === input.playerOneId);
   const playerTwo = players.find((player) => player.id === input.playerTwoId);
 
@@ -294,18 +301,27 @@ function simulateMatch(input: z.infer<typeof MatchSchema>, players: LadderPlayer
     return player;
   });
 
+  const nextMatch: MatchRecord = {
+    id: crypto.randomUUID(),
+    player_one_id: input.playerOneId,
+    player_two_id: input.playerTwoId,
+    player_one_rounds: input.playerOneRounds,
+    player_two_rounds: input.playerTwoRounds,
+    played_at: new Date().toISOString(),
+  };
+
   return {
     match: {
-      id: crypto.randomUUID(),
-      player_one_id: input.playerOneId,
-      player_two_id: input.playerTwoId,
-      player_one_rounds: input.playerOneRounds,
-      player_two_rounds: input.playerTwoRounds,
+      id: nextMatch.id,
+      player_one_id: nextMatch.player_one_id,
+      player_two_id: nextMatch.player_two_id,
+      player_one_rounds: nextMatch.player_one_rounds,
+      player_two_rounds: nextMatch.player_two_rounds,
     },
     rating,
     medalAwards,
     streaks,
-    ladder: sortLadder(nextPlayers),
+    ladder: sortLadder(enrichPlayersWithHeadToHead(nextPlayers, [...matches, nextMatch])),
     demoMode,
   };
 }
@@ -439,4 +455,32 @@ async function insertMedalAwards(admin: ReturnType<typeof createAdminClient>, aw
   if (rows.length > 0) {
     await admin.from("player_medals").insert(rows);
   }
+}
+
+function recentFormForPlayer(playerId: string, matches: MatchRecord[]) {
+  return [...matches]
+    .filter((match) => match.player_one_id === playerId || match.player_two_id === playerId)
+    .sort((a, b) => Date.parse(b.played_at ?? "") - Date.parse(a.played_at ?? ""))
+    .slice(0, 5)
+    .map((match) => {
+      const isPlayerOne = match.player_one_id === playerId;
+      const roundsFor = isPlayerOne ? match.player_one_rounds : match.player_two_rounds;
+      const roundsAgainst = isPlayerOne ? match.player_two_rounds : match.player_one_rounds;
+      if (roundsFor > roundsAgainst) return "W";
+      if (roundsFor < roundsAgainst) return "L";
+      return "D";
+    });
+}
+
+function lastWinForPlayer(playerId: string, matches: MatchRecord[]) {
+  const win = [...matches]
+    .filter((match) => {
+      if (match.player_one_id === playerId) return match.player_one_rounds > match.player_two_rounds;
+      if (match.player_two_id === playerId) return match.player_two_rounds > match.player_one_rounds;
+      return false;
+    })
+    .sort((a, b) => Date.parse(b.played_at ?? "") - Date.parse(a.played_at ?? ""))
+    .at(0);
+
+  return win?.played_at ?? null;
 }

@@ -40,6 +40,20 @@ describe("evaluateMedalAwards", () => {
     expect(awards).toContainEqual({ playerId: "player-one", medalKey: "bloodthirsty_5" });
   });
 
+  it("awards Black Ops style streak medals at higher thresholds", () => {
+    const awards = evaluateMedalAwards({
+      playerOne: {
+        ...basePlayer,
+        currentWinStreakBefore: 9,
+        currentWinStreakAfter: 10,
+        matchRoundsWon: 1,
+      },
+      playerTwo: { ...basePlayer, id: "player-two" },
+    });
+
+    expect(awards).toContainEqual({ playerId: "player-one", medalKey: "merciless_10" });
+  });
+
   it("awards Winner! for a first round win", () => {
     const awards = evaluateMedalAwards({
       playerOne: {

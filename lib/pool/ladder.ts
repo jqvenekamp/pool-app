@@ -12,11 +12,27 @@ export type LadderPlayer = {
   recent_form?: string[];
   medal_count?: number;
   last_win_at?: string | null;
+  head_to_head?: HeadToHeadSummary[];
 };
 
 export type RankedPlayer = LadderPlayer & {
   rank: number;
   winPercentage: number;
+};
+
+export type HeadToHeadSummary = {
+  opponentId: string;
+  opponentName: string;
+  wins: number;
+  losses: number;
+  draws: number;
+  roundsFor: number;
+  roundsAgainst: number;
+  currentStreak: number;
+  currentStreakType: "win" | "loss" | "draw" | "none";
+  bestWinStreak: number;
+  recentResults: string[];
+  lastPlayedAt: string | null;
 };
 
 export function winPercentage(player: Pick<LadderPlayer, "rounds_won" | "rounds_lost">) {

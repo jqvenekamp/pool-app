@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --background: #061a15;
-  --foreground: #f5efe0;
-  --felt-line: rgba(215, 181, 109, 0.14);
+  --background: #fff7ef;
+  --foreground: #171717;
+  --brand-line: rgba(23, 23, 23, 0.07);
 }
 
 * {
@@ -21,9 +21,8 @@ body {
   margin: 0;
   color: var(--foreground);
   background:
-    radial-gradient(circle at 20% 0%, rgba(20, 82, 62, 0.62), transparent 34rem),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0 12%, transparent 12% 100%),
-    #061a15;
+    linear-gradient(115deg, rgba(255, 90, 31, 0.16) 0 18%, transparent 18% 100%),
+    linear-gradient(180deg, #fff7ef 0%, #fff 46%, #fff7ef 100%);
   font-family:
     Arial,
     Helvetica,
@@ -38,17 +37,17 @@ textarea {
 }
 
 ::selection {
-  color: #061a15;
-  background: #d7b56d;
+  color: #fff7ef;
+  background: #ff5a1f;
 }
 
 .felt-grid {
   background-image:
-    linear-gradient(var(--felt-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--felt-line) 1px, transparent 1px);
-  background-size: 34px 34px;
+    linear-gradient(var(--brand-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--brand-line) 1px, transparent 1px);
+  background-size: 42px 42px;
 }
 
 .focus-ring {
-  @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass-400;
+  @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange;
 }
