@@ -5,7 +5,7 @@ create table if not exists public.players (
   display_name text not null,
   avatar_url text,
   active boolean not null default true,
-  stars numeric(4,2) not null default 1.00 check (stars >= 1 and stars <= 5),
+  stars numeric(4,2) not null default 2.00 check (stars >= 1 and stars <= 5),
   games_played integer not null default 0 check (games_played >= 0),
   rounds_won integer not null default 0 check (rounds_won >= 0),
   rounds_lost integer not null default 0 check (rounds_lost >= 0),
@@ -55,7 +55,7 @@ create table if not exists public.rating_events (
   delta numeric(5,3) not null,
   expected_score numeric(5,4) not null,
   actual_score numeric(5,4) not null,
-  formula_version text not null default 'star_elo_v1',
+  formula_version text not null default 'star_elo_v2',
   created_at timestamptz not null default now()
 );
 

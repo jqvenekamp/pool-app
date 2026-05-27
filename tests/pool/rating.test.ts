@@ -4,16 +4,16 @@ import { calculateRating } from "@/lib/pool/rating";
 describe("calculateRating", () => {
   it("does not meaningfully change equal new players on a 1-1 draw", () => {
     const result = calculateRating({
-      playerOneStars: 1,
-      playerTwoStars: 1,
+      playerOneStars: 2,
+      playerTwoStars: 2,
       playerOneGames: 0,
       playerTwoGames: 0,
       playerOneRounds: 1,
       playerTwoRounds: 1,
     });
 
-    expect(result.playerOne.delta).toBe(0);
-    expect(result.playerTwo.delta).toBe(0);
+    expect(Math.abs(result.playerOne.delta)).toBeLessThanOrEqual(0.01);
+    expect(Math.abs(result.playerTwo.delta)).toBeLessThanOrEqual(0.01);
   });
 
   it("drops a high-rated player who draws a lower-rated player", () => {
@@ -113,5 +113,35 @@ describe("calculateRating", () => {
 
     expect(floor.playerOne.after).toBeGreaterThanOrEqual(1);
     expect(ceiling.playerOne.after).toBeLessThanOrEqual(5);
+  });
+
+  it("does not send a provisional player back to the floor after one early upset loss", () => {
+    const firstWin = calculateRating({
+      playerOneStars: 2,
+      playerTwoStars: 2,
+      playerOneGames: 0,
+      playerTwoGames: 0,
+      playerOneRounds: 1,
+      playerTwoRounds: 0,
+    });
+    const secondWin = calculateRating({
+      playerOneStars: firstWin.playerOne.after,
+      playerTwoStars: 2,
+      playerOneGames: 1,
+      playerTwoGames: 0,
+      playerOneRounds: 1,
+      playerTwoRounds: 0,
+    });
+    const upsetLoss = calculateRating({
+      playerOneStars: secondWin.playerOne.after,
+      playerTwoStars: 2,
+      playerOneGames: 2,
+      playerTwoGames: 0,
+      playerOneRounds: 0,
+      playerTwoRounds: 1,
+    });
+
+    expect(upsetLoss.playerOne.after).toBeGreaterThan(2);
+    expect(upsetLoss.playerOne.delta).toBeGreaterThanOrEqual(-0.18);
   });
 });

@@ -101,6 +101,15 @@ export function PoolWorkspace() {
         ) : null}
       </div>
 
+      <div className="rounded-[18px] border border-brand-ink/10 bg-white p-5 shadow-sm">
+        <h3 className="mb-3 text-sm font-black text-brand-ink">House Rules</h3>
+        <ol className="list-decimal space-y-2 pl-5 text-sm text-brand-ink/70">
+          <li>Foul = ball-in-hand. Pocketing the cue ball or not hitting your own ball first means your opponent can place the white ball anywhere.</li>
+          <li>Break doesn't decide ball type. If a ball goes in on the break, the table is still open — you must pocket one after to claim solids or stripes.</li>
+          <li>Free choice on the 8-ball pocket. We don't play opposite-pocket rules — you can call any hole for the final black ball.</li>
+        </ol>
+      </div>
+
       {demoMode ? (
         <div className="fixed bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-brand-orange/20 bg-white px-3 py-1.5 text-xs font-black text-brand-orange shadow-2xl">
           Demo data

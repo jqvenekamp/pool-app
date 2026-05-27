@@ -3,6 +3,7 @@ import { z } from "zod";
 import { demoMatches, demoPlayers } from "@/lib/pool/demo";
 import { enrichPlayersWithHeadToHead } from "@/lib/pool/head-to-head";
 import { sortLadder } from "@/lib/pool/ladder";
+import { STARTING_STARS } from "@/lib/pool/rating";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { hasSupabaseAdminEnv } from "@/lib/supabase/config";
 
@@ -91,7 +92,7 @@ export async function POST(request: Request) {
       display_name: displayName,
       avatar_url: null,
       active: true,
-      stars: 1,
+      stars: STARTING_STARS,
       games_played: 0,
       rounds_won: 0,
       rounds_lost: 0,
@@ -125,7 +126,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "That player is already on the ladder." }, { status: 409 });
   }
 
-  const { error: insertError } = await supabase.from("players").insert({ display_name: displayName });
+  const { error: insertError } = await supabase.from("players").insert({
+    display_name: displayName,
+    stars: STARTING_STARS,
+  });
 
   if (insertError) {
     return NextResponse.json({ error: insertError.message }, { status: 500 });

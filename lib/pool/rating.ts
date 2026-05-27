@@ -25,10 +25,11 @@ export type RatingResult = {
 const MIN_STARS = 1;
 const MAX_STARS = 5;
 const CENTER_STARS = 3;
+const STARTING_STARS = 2;
 const BASE_K = 0.32;
-const FORMULA_VERSION = "star_elo_v1";
+const FORMULA_VERSION = "star_elo_v2";
 
-export { FORMULA_VERSION, MAX_STARS, MIN_STARS };
+export { FORMULA_VERSION, MAX_STARS, MIN_STARS, STARTING_STARS };
 
 export function clampStars(value: number) {
   return Math.min(MAX_STARS, Math.max(MIN_STARS, value));
@@ -68,14 +69,24 @@ export function dynamicKFactor(currentStars: number, playerGames: number, totalR
 function nextRating(currentStars: number, playerGames: number, actual: number, expected: number, totalRounds: number) {
   const kFactor = dynamicKFactor(currentStars, playerGames, totalRounds);
   const rawDelta = kFactor * (actual - expected);
-  const distributionPressure = 0.015 * (CENTER_STARS - currentStars) * Math.min(1, playerGames / 20);
-  const after = clampStars(currentStars + rawDelta + distributionPressure);
+  const matchDelta = applyProvisionalLossCap(rawDelta, playerGames);
+  const distributionPressure = 0.03 * (CENTER_STARS - currentStars) * Math.min(1, (playerGames + 4) / 16);
+  const after = clampStars(currentStars + matchDelta + distributionPressure);
 
   return {
     after: roundRating(after),
     delta: roundRating(after - currentStars),
     kFactor: roundRating(kFactor),
   };
+}
+
+function applyProvisionalLossCap(rawDelta: number, playerGames: number) {
+  if (rawDelta >= 0 || playerGames >= 10) {
+    return rawDelta;
+  }
+
+  const maxLoss = playerGames < 5 ? 0.18 : 0.25;
+  return Math.max(rawDelta, -maxLoss);
 }
 
 export function calculateRating(input: RatingInput): RatingResult {
