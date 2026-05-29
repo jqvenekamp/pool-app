@@ -108,7 +108,7 @@ export function PoolWorkspace() {
           <li>Break doesn&apos;t decide ball type. If a ball goes in on the break, the table is still open — you must pocket one after to claim solids or stripes.</li>
           <li>Free choice on the 8-ball pocket. We don&apos;t play opposite-pocket rules — you can call any hole for the final black ball.</li>
           <li>When you pot the 8-ball on the break, you win the game.</li>
-          <li>At the start of the game, agree on  'calling the ball & corner'. When you play with calling, missing the corner (even when it ends up down a different corner) is considered a foul.</li>
+          <li>At the start of the game, agree on  &apos;calling the ball & corner&apos;. When you play with calling, missing the corner (even when it ends up down a different corner) is considered a foul.</li>
         </ol>
       </div>
 
